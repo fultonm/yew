@@ -2,6 +2,7 @@ use cell::Cellule;
 use gloo::timers::callback::Interval;
 use rand::Rng;
 use std::time::Instant;
+use web_sys::{CanvasRenderingContext2d, Document, HtmlCanvasElement};
 use yew::{classes, html, Component, ComponentLink, Html, InputData, ShouldRender};
 
 mod cell;
