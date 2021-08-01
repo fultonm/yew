@@ -1,14 +1,13 @@
 use cell::Cellule;
 use gloo::timers::callback::Interval;
 use rand::Rng;
-use std::time::Instant;
 use yew::{classes, html, Component, ComponentLink, Html, InputData, ShouldRender};
 
 mod cell;
 
 const DEFAULT_INTERVAL: usize = 0;
-const DEFAULT_WIDTH: usize = 50;
-const DEFAULT_HEIGHT: usize = 36;
+const DEFAULT_WIDTH: usize = 40;
+const DEFAULT_HEIGHT: usize = 35;
 
 pub enum Msg {
   Random,
@@ -18,8 +17,7 @@ pub enum Msg {
   Stop,
   ToggleCellule(usize),
   SetInterval(String),
-  SetWidth(usize),
-  SetHeight(usize),
+  SetDimensions(usize, usize),
   Tick,
 }
 
@@ -30,8 +28,6 @@ pub struct Model {
   cellules_width: usize,
   cellules_height: usize,
   interval_duration: usize,
-  tick_durations: Vec<usize>,
-  avg_tick_duration: usize,
   _interval: Interval,
 }
 
@@ -97,14 +93,6 @@ impl Model {
     row * self.cellules_width + col
   }
 
-  fn update_tick_durations(&mut self, tick_duration: usize) {
-    if self.tick_durations.len() > 10 {
-      self.tick_durations.remove(0);
-    }
-    self.tick_durations.push(tick_duration);
-    self.avg_tick_duration = self.tick_durations.iter().sum::<usize>() / self.tick_durations.len();
-  }
-
   fn view_cellule(&self, idx: usize, cellule: &Cellule) -> Html {
     let cellule_status = {
       if cellule.is_alive() {
@@ -132,8 +120,6 @@ impl Component for Model {
 
     let (cellules_width, cellules_height) = (DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
-    let tick_durations = Vec::with_capacity(5);
-
     Self {
       link,
       active: false,
@@ -141,8 +127,6 @@ impl Component for Model {
       cellules_width,
       cellules_height,
       interval_duration,
-      tick_durations,
-      avg_tick_duration: 0,
       _interval: interval,
     }
   }
@@ -183,19 +167,12 @@ impl Component for Model {
           false
         }
       }
-      Msg::SetWidth(width) => {
+      Msg::SetDimensions(width, height) => {
         self.active = false;
         log::info!("Stop");
         self.reset();
         log::info!("Reset");
         self.cellules_width = width;
-        true
-      }
-      Msg::SetHeight(height) => {
-        self.active = false;
-        log::info!("Stop");
-        self.reset();
-        log::info!("Reset");
         self.cellules_height = height;
         true
       }
@@ -206,9 +183,7 @@ impl Component for Model {
       }
       Msg::Tick => {
         if self.active {
-          let tick_start = Instant::now();
           self.step();
-          self.update_tick_durations(tick_start.elapsed().as_millis() as usize);
           true
         } else {
           false
@@ -263,10 +238,7 @@ impl Component for Model {
                                oninput={self.link.callback(move |e: InputData| Msg::SetInterval(e.value))} />
                     </div>
                     <div class="game-statistics">
-                    <div>
-                      { format!("Average tick duration (ms): {}", self.avg_tick_duration) }
                     </div>
-                </div>
                 </section>
             </section>
             <footer class="app-footer">
