@@ -7,8 +7,9 @@ use yew::{html, Component, ComponentLink, Html, InputData, NodeRef, ShouldRender
 mod cell;
 
 const DEFAULT_INTERVAL: usize = 0;
-const DEFAULT_WIDTH: usize = 180;
-const DEFAULT_HEIGHT: usize = 86;
+const DEFAULT_WIDTH: usize = 450;
+const DEFAULT_HEIGHT: usize = 216;
+const CELLULE_SIZE_FACTOR: usize = 2;
 
 pub enum Msg {
     Random,
@@ -109,7 +110,12 @@ impl Model {
                     } else {
                         context.set_fill_style(&"#FFF".into());
                     }
-                    context.fill_rect((col * 2) as f64, (row * 2) as f64, 2 as f64, 2 as f64);
+                    context.fill_rect(
+                        (col * CELLULE_SIZE_FACTOR) as f64,
+                        (row * CELLULE_SIZE_FACTOR) as f64,
+                        CELLULE_SIZE_FACTOR as f64,
+                        CELLULE_SIZE_FACTOR as f64,
+                    );
                 }
             }
         }
@@ -156,7 +162,7 @@ impl Component for Model {
             }
             Msg::Step => {
                 self.step();
-                true
+                false
             }
             Msg::Reset => {
                 self.reset();
@@ -197,10 +203,8 @@ impl Component for Model {
                 if self.active {
                     self.step();
                     self.view_cellule();
-                    true
-                } else {
-                    false
                 }
+                false
             }
         }
     }
@@ -210,6 +214,7 @@ impl Component for Model {
     }
 
     fn view(&self) -> Html {
+        log::info!("view..");
         html! {
             <div>
             <section class="game-container">
@@ -218,7 +223,7 @@ impl Component for Model {
                     <h1 class="app-title">{ "Game of Life" }</h1>
                 </header>
                 <section class="game-area">
-                  <canvas ref={self.canvas_ref.clone()} height="172px" width="360px" style="background:#FFF;"></canvas>
+                  <canvas ref={self.canvas_ref.clone()} height={format!("{}px",self.cellules_height * CELLULE_SIZE_FACTOR)} width={format!("{}px",self.cellules_width * CELLULE_SIZE_FACTOR)} style="background:#FFF;"></canvas>
                     <div class="game-buttons">
                         <button class="game-button" onclick={self.link.callback(|_| Msg::Random)}>{ "Random" }</button>
                         <button class="game-button" onclick={self.link.callback(|_| Msg::Step)}>{ "Step" }</button>
