@@ -7,19 +7,25 @@ pub enum State {
 #[derive(Clone, Copy)]
 pub struct Cellule {
     pub state: State,
+    pub render: bool,
 }
 
 impl Cellule {
     pub fn new_dead() -> Self {
-        Self { state: State::Dead }
+        Self {
+            state: State::Dead,
+            render: false,
+        }
     }
 
     pub fn set_alive(&mut self) {
         self.state = State::Alive;
+        self.set_render_flag(true);
     }
 
     pub fn set_dead(&mut self) {
         self.state = State::Dead;
+        self.set_render_flag(true);
     }
 
     pub fn is_alive(self) -> bool {
@@ -32,6 +38,14 @@ impl Cellule {
         } else {
             self.set_alive()
         }
+    }
+
+    pub fn set_render_flag(&mut self, render: bool) {
+        self.render = render;
+    }
+
+    pub fn should_render(self) -> bool {
+        return self.render;
     }
 
     pub fn count_alive_neighbors(neighbors: &[Self]) -> usize {
