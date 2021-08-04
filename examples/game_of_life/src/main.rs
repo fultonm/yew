@@ -2,7 +2,7 @@ use cell::Cellule;
 use game::Game;
 use gloo::timers::callback::Interval;
 use wasm_bindgen::JsCast;
-use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement};
+use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, MouseEvent};
 use yew::{html, Component, ComponentLink, Html, InputData, NodeRef, ShouldRender};
 
 mod cell;
@@ -12,9 +12,9 @@ const DEFAULT_INTERVAL: usize = 33;
 const DEFAULT_WIDTH: usize = 90;
 const DEFAULT_HEIGHT: usize = 50;
 const CANVAS_SIZE_FACTOR: usize = 8;
-const COLOR_GRID: &str = "bisque";
 const COLOR_CELL_ALIVE: &str = "chocolate";
-const COLOR_CELL_DEAD: &str = "white";
+const COLOR_CELL_DEAD: &str = "#6d2f04";
+const COLOR_GRID: &str = "#7d3605";
 
 pub enum Msg {
     Random,
@@ -23,6 +23,7 @@ pub enum Msg {
     Reset,
     Stop,
     ToggleCellule(usize),
+    Test(String),
     SetIntervalInput(String),
     SetInterval,
     SetHeightInput(String),
@@ -65,8 +66,8 @@ impl Model {
         context.set_fill_style(&COLOR_CELL_ALIVE.into());
         to_alive.iter().for_each(|c| {
             context.fill_rect(
-                (c.0 * CANVAS_SIZE_FACTOR) as f64 + 1.0,
-                (c.1 * CANVAS_SIZE_FACTOR) as f64 + 1.0,
+                (c.0 * CANVAS_SIZE_FACTOR) as f64,
+                (c.1 * CANVAS_SIZE_FACTOR) as f64,
                 CANVAS_SIZE_FACTOR as f64 - 1.0,
                 CANVAS_SIZE_FACTOR as f64 - 1.0,
             )
@@ -74,8 +75,8 @@ impl Model {
         context.set_fill_style(&COLOR_CELL_DEAD.into());
         to_dead.iter().for_each(|c| {
             context.fill_rect(
-                (c.0 * CANVAS_SIZE_FACTOR) as f64 + 1.0,
-                (c.1 * CANVAS_SIZE_FACTOR) as f64 + 1.0,
+                (c.0 * CANVAS_SIZE_FACTOR) as f64,
+                (c.1 * CANVAS_SIZE_FACTOR) as f64,
                 CANVAS_SIZE_FACTOR as f64 - 1.0,
                 CANVAS_SIZE_FACTOR as f64 - 1.0,
             )
@@ -116,6 +117,11 @@ impl Component for Model {
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
+            Msg::Test(msg) => {
+                let canvas_width = self.canvas_ref.cast::<HtmlCanvasElement>().unwrap().width();
+                log::info!("click x is {}, canvas width is {}", msg, canvas_width);
+                false
+            }
             Msg::Random => {
                 self.game.random_mutate();
                 self.draw_cellules(true);
@@ -164,7 +170,7 @@ impl Component for Model {
                     //self._interval.cancel();
                     let callback = self.link.callback(|_| Msg::Tick);
                     self._interval =
-                        Interval::new(self.interval_duration as u32, move || callback.emit(()));
+                        Interval::new(interval_duration as u32, move || callback.emit(()));
                     log::info!("interval was set");
                 } else {
                     log::info!("interval duration was same");
@@ -196,7 +202,7 @@ impl Component for Model {
                 canvas.set_width((self.game.cellules_width * CANVAS_SIZE_FACTOR) as u32);
                 canvas.set_height((self.game.cellules_height * CANVAS_SIZE_FACTOR) as u32);
                 self.draw_cellules(true);
-                false
+                true
             }
             Msg::ToggleCellule(idx) => {
                 let cellule = self.game.cellules.get_mut(idx).unwrap();
@@ -232,14 +238,19 @@ impl Component for Model {
                     <a href="https://github.com/yewstack/yew" target="_blank">{ "source" }</a>
                   </div>
               </header>
-              <div class="game-area">
               <div class="game-canvas-container">
+
+
               <canvas
-                    class="game-canvas"
-                  ref={self.canvas_ref.clone()}
-                  height={format!("{}px",self.game.cellules_height * CANVAS_SIZE_FACTOR)}
-                  width={format!("{}px",self.game.cellules_width * CANVAS_SIZE_FACTOR)}  />
-                  </div>
+              class="game-canvas"
+              ref={self.canvas_ref.clone()}
+              height={format!("{}px",self.game.cellules_height * CANVAS_SIZE_FACTOR)}
+              width={format!("{}px",self.game.cellules_width * CANVAS_SIZE_FACTOR)}
+              onmouseup={self.link.callback(|e: MouseEvent| Msg::Test(e.offset_x().to_string()))} />
+              </div>
+
+              <div class="game-area">
+
                 <div class="game-controls">
                     <h2 class="game-controls-title">{"Initialize Pattern"}</h2>
                     <button class="game-button" onclick={self.link.callback(|_| Msg::Random)}>{ "Random" }</button>
@@ -305,9 +316,7 @@ impl Component for Model {
 
               </div>
               <footer class="app-footer">
-                <strong class="footer-text">
-
-                </strong>
+                <p><a href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life" target="_blank" >{ "Conway's Game of Life - Wikipedia" }</a></p>
 
               </footer>
           </>
@@ -315,7 +324,25 @@ impl Component for Model {
         }
     }
 
-    fn rendered(&mut self, _first_render: bool) {
+    fn rendered(&mut self, first_render: bool) {
+        if first_render {
+            let canvas = self.canvas_ref.cast::<HtmlCanvasElement>().unwrap();
+            let context = canvas
+                .get_context("2d")
+                .unwrap()
+                .unwrap()
+                .dyn_into::<web_sys::CanvasRenderingContext2d>()
+                .unwrap();
+            self.context_ref = Some(context);
+        }
+        let context = self.context_ref.as_ref().unwrap();
+        context.set_fill_style(&COLOR_GRID.into());
+        context.fill_rect(
+            0.0,
+            0.0,
+            (self.game.cellules_width * CANVAS_SIZE_FACTOR) as f64 - 1.0,
+            (self.game.cellules_height * CANVAS_SIZE_FACTOR) as f64 - 1.0,
+        );
         self.draw_cellules(true);
     }
 }
