@@ -5,100 +5,128 @@ body {
   text-align: center;
 }
 
+a {
+  color: salmon;
+}
+a:hover {
+  color: bisque;
+}
+
 body {
   font: 14px "Helvetica Neue", Helvetica, Arial, sans-serif;
   line-height: 1.4em;
   color: #4d4d4d;
-  min-width: 230px;
-  max-width: 1000px;
   margin: 0 auto;
   -webkit-font-smoothing: antialiased;
   -moz-font-smoothing: antialiased;
   font-smoothing: antialiased;
+  -webkit-text-rendering: optimizeLegibility;
+  -moz-text-rendering: optimizeLegibility;
+  text-rendering: optimizeLegibility;
   font-weight: 300;
-  background-color: #000000;
-}
-
-.app-logo {
-  animation: app-logo-scale infinite 4s linear;
-  height: 80px;
-  width: 80px;
+  background-color:#6d2f04;
 }
 
 .app-header {
-  background-color: #000;
-  height: 130px;
+  margin-top: 20px;
+  margin-bottom: 20px;
   color: aliceblue;
 }
 
 .app-title {
   font-size: 24px;
   width: 100%;
-  font-weight: 100;
+  font-weight: bold;
   text-align: center;
-  -webkit-text-rendering: optimizeLegibility;
-  -moz-text-rendering: optimizeLegibility;
-  text-rendering: optimizeLegibility;
+
 }
 
+
 .app-footer {
-  background-color: #000000;
   height: 30px;
   padding: 10px;
 }
 
 .footer-text {
   color: aliceblue;
-  padding-left: 20px;
   font-size: 14px;
 }
 
 .game-area {
-  width: 94%;
-  margin: 20px auto;
+  background-color: bisque;
+  border: 5px solid chocolate;
+  border-radius: 5px;
+  box-sizing:content-box; 
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
 }
 
-.game-container {
-  background: #000000;
-  margin: 20px 0 0px 0;
+
+
+.game-canvas-container {
+  margin: 20px;
+  flex:70%;
 }
 
-.game-of-life {
-  display: inline-block;
-  background-color: aliceblue;
-  width: max-content;
-  overflow: hidden;
-}
-
-.game-row {
-  line-height: 0;
-}
-
-.game-cellule {
-  display: inline-block;
-  width: 2px;
-  height: 2px;
-  border: 1px solid #ccc;
-}
-
-.cellule-dead {
-  background-color: white;
-}
-
-.cellule-live {
-  background-color: black;
-}
-
-.game-buttons {
+.game-canvas {
   width: 100%;
+}
+
+.game-controls {
+  margin: 20px;
+  flex: 50%;
+  max-width: 180px;
+}
+
+.game-controls-title {
+  width: 100%;
+  color:chocolate;
+  text-align: left;
+}
+
+.game-button {
+  color: chocolate;
+  background-color: white;
+  border: 2px solid chocolate;
+  border-radius: 4px;
+  width: 100%;
+  height: 30px;
+  margin-top: 20px; 
+}
+
+.game-button:hover {
+  color: white;
+  background-color: chocolate;
+  border: 2px solid #6d2f04;
+  border-radius: 4px;
+  width: 100%;
+  height: 30px;
+  margin-top: 20px; 
+}
+
+
+.game-setting { 
+  display: flex;
+  justify-content: space-between;
   margin-top: 20px;
 }
 
-@keyframes app-logo-scale {
-  from {
-    transform: scale(0.8);
-  }
-  to {
-    transform: scale(1.2);
-  }
+.game-settings-input-label {
+  color:chocolate;
+  font-weight: bold;
+  flex: 0 1 auto;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  margin-right: 5px;
 }
+
+.game-settings-input {
+  width: 70px;
+  height: 25px;
+  font-size: 14px;
+  color:chocolate;
+  text-align: right;
+}
+
