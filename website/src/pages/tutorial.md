@@ -3,28 +3,46 @@
 In this hands-on tutorial, we will take a look at how we can use Yew to build web applications.
 **Yew** is a modern [Rust](https://www.rust-lang.org/) framework for building front-end web apps using [WebAssembly](https://webassembly.org/).
 Yew encourages a reusable, maintainable, and well-structured architecture by leveraging Rust's powerful type system.
-A large ecosystem of community-created libraries (or crates?) provide components that work out-of-the-box and
-commonly-used patterns such as state management.
 
-Using WebAssembly also allows us to take advantage of numerous crates available on [crates.io](https://crates.io)
+A large ecosystem of community-created libraries, known in Rust as [crates](https://doc.rust-lang.org/book/ch07-01-packages-and-crates.html), provide components for commonly-used patterns such as state management.
+[Cargo](https://doc.rust-lang.org/cargo/), the package manager for Rust, allows us to take advantage of the numerous crates available on [crates.io](https://crates.io), such as Yew.
 
 ### What we are going to build
 
 Rustconf is an intergalactic gathering of the Rust community that happens annually.
 Rustconf 2020 had a plethora of talks that provided a good amount of information.
-In this hands on tutorial, we will be building a web application to help fellow Rustaceans
-have overview of the talks, and watch them all from one page.
+In this hands-on tutorial, we will be building a web application to help fellow Rustaceans
+get an overview of the talks and watch them all from one page.
 
 ## Setting up
 
 ### Prerequisites
 
+This tutorial assumes you're already familiar with Rust.
+
+If you're new to Rust, the free [Rust Book](https://doc.rust-lang.org/book/ch00-00-introduction.html) offers a great starting point for beginners and continues to be an excellent resource even for experienced Rust developers.
+
 To get started, let's make sure we have an up-to-date development environment.
 We will need the following tools:
-- [Rust](https://www.rust-lang.org/).
-- [`trunk`](https://trunkrs.dev/)
 
-This tutorial also assumes you're already familiar with Rust.
+- [Rust](https://www.rust-lang.org/)
+- [Trunk](https://trunkrs.dev/)
+- `wasm32-unknown-unknown`, the WASM compiler and build target for Rust
+
+Ensure the latest version of Rust is installed by running `rustup update` or by 
+[installing rust](https://www.rust-lang.org/tools/install) if you haven't already done so already.
+
+After installing Rust, you can use Cargo to install `trunk` by running:
+
+```bash
+cargo install trunk
+```
+
+We will also need to add the WASM build target by running:
+
+```bash
+rustup target add wasm32-unknown-unknown
+```
 
 ### Setting up the project
 
@@ -33,6 +51,7 @@ First, create a new cargo project:
 ```bash
 cargo new yew-app
 cd yew-app
+```
 
 To verify the Rust environment is set up properly, run the initial project using the cargo build tool. 
 After output about the build process, you should see the expected "Hello, world!" message.
@@ -71,7 +90,7 @@ fn main() {
 }
 ```
 
-Now, let's create and `index.html` at the root of the project.
+Now, let's create an `index.html` at the root of the project:
 
 ```html title="index.html"
 <!DOCTYPE html>
@@ -92,7 +111,7 @@ Run the following command to build and serve the application locally.
 trunk serve
 ```
 
-Trunk will helpfully rebuild your application if you modify any source files.
+Trunk will watch the project directory and helpfully rebuild your application if you modify any source files.
 
 ### Congratulations
 
@@ -155,7 +174,7 @@ html! {
 
 Refresh the browser page, and you should see the following output displayed:
 
-**TODO: Add screenshot**
+![Screenshot displaying our basic HTML structure](../../static/tutorial/screenshot_1.jpg)
 
 ### Using Rust language constructs in the markup
 
@@ -214,7 +233,7 @@ let videos = videos.iter().map(|video| html! {
 
 ## Components
 
-Components are the building blocks of Yew application. We can combine components, which can be made of other components, 
+Components are the building blocks of Yew application. By combining components, which can be made of other components, 
 we build our application. By structuring our components for re-usability and keeping them generic, we'll be able to use 
 them in multiple parts of our application without having to duplicate code or logic.
 
@@ -389,17 +408,16 @@ element returned by the `Iterator` with the `{ for ... }` syntax.
 
 ### Handling state
 
-Remember the `use_state` used earlier? That is a special function, called a "hook". Hooks are used to "hook" into 
-lifecycle of a function component and perform actions. You can learn more about this hook, and others 
+Remember the `use_state` used earlier? That is a special function, called a "hook". Hooks are simply functions that let you “hook into” components' state and/or lifecycle and perform actions. You can learn more about this hook, and others 
 [here](/next/concepts/function-components/pre-defined-hooks#use_state)
 
 :::note
-Struct components act differently. See the documentation to learn about those.
+Struct components act differently. See the documentation on [Components](https://yew.rs/concepts/components?) to learn about those.
 :::
 
 ## Fetching data (using external REST API)
 
-In a real world application, data will basically never be hardcoded but instead will come from an API. Let's fetch our 
+In a real world application, data will usually come from an API instead of being hardcoded. Let's fetch our 
 videos list from external source. For this we will need to add the following crates:
 - [`reqwasm`](https://crates.io/crates/reqwasm)
   For making the fetch call.
@@ -430,7 +448,7 @@ struct Video {
 }
 ```
 
-Now as the last step, we need to update our `App` component to make the fetch request instead of using hardcoded data
+Now as the last step, we need to update our `App` component to make the fetch request:
 
 ```rust {3-23,32-33}
 #[function_component(App)]
@@ -474,10 +492,10 @@ fn app() -> Html {
 ```
 
 :::note
-We're using `unwrap`s here because it is a demo application. In a real world, you want to have proper error handling.
+We're using `unwrap`s here because it is a demo application. In a real world, you want to have [proper error handling](https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html).
 :::
 
-Now look at the browser to see everything working as expected... which would've been the case if it weren't for CORS.
+Now look at the browser to see everything working as expected... which would've been the case if it weren't for CORS (cross-origin resource sharing), a security mechanism that affects local development.
 In order to fix that, we need a proxy server. Luckily trunk provides that.
 
 Update the following line:
